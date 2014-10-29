@@ -94,7 +94,7 @@
 #endif
 
 #ifndef CC2420_CONF_CHANNEL
-#define CC2420_CONF_CHANNEL              26
+#define CC2420_CONF_CHANNEL              21
 #endif /* CC2420_CONF_CHANNEL */
 
 #ifndef CC2420_CONF_CCA_THRESH
