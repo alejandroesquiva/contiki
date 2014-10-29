@@ -64,9 +64,10 @@
  * The build system automatically compiles the resources in the corresponding sub-directory.
  */
 extern resource_t
-  res_hello;
-  /*res_mirror,
+  res_hello,
   res_chunks,
+  res_ipv6;
+  /*res_mirror,
   res_separate,
   res_push,
   res_event,
@@ -126,8 +127,9 @@ PROCESS_THREAD(er_example_server, ev, data)
    * All static variables are the same for each URI path.
    */
   rest_activate_resource(&res_hello, "test/hello");
+  rest_activate_resource(&res_ipv6, "test/ipv6");
 /*  rest_activate_resource(&res_mirror, "debug/mirror"); */
-/*  rest_activate_resource(&res_chunks, "test/chunks"); */
+  rest_activate_resource(&res_chunks, "test/chunks");
 /*  rest_activate_resource(&res_separate, "test/separate"); */
   /*rest_activate_resource(&res_push, "test/push");*/
 /*  rest_activate_resource(&res_event, "sensors/button"); */

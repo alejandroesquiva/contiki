@@ -35,76 +35,10 @@
  * \author
  *      Matthias Kovatsch <kovatsch@inf.ethz.ch>
  */
-#include <stdio.h>
 
 #include <stdlib.h>
 #include <string.h>
-/*#include "contiki-net.h"*/
 #include "rest-engine.h"
-#include "net/ipv6/uip-ds6.h"
-
-
-static uip_ipaddr_t*
-getHostAddress(void)
-{
-  int i;
-  uint8_t state;
-
-  printf("Server IPv6 addresses:\n");
-  for(i = 0; i < UIP_DS6_ADDR_NB; i++) {
-    state = uip_ds6_if.addr_list[i].state;
-    if(uip_ds6_if.addr_list[i].isused &&
-       (state == ADDR_TENTATIVE || state == ADDR_PREFERRED)) {
-
-      uip_ipaddr_t *address;
-      address = uip_gethostaddr(&uip_ds6_if.addr_list[i].ipaddr);
-      return address;
-    }
-  }
-}
-
-
-static char*
-ipaddr_get_char(const uip_ipaddr_t *addr)
-{
-
-  char *text;
-
-
-  uint16_t a;
-  int i, f;
-  for(i = 0, f = 0; i < sizeof(uip_ipaddr_t); i += 2) {
-    a = (addr->u8[i] << 8) + addr->u8[i + 1];
-    if(a == 0 && f >= 0) {
-      if(f++ == 0) {
-        text = appendCharToCharArray(text,":");
-        text = appendCharToCharArray(text,":");
-      }
-    } else {
-      if(f > 0) {
-        f = -1;
-      } else if(i > 0) {
-        text = appendCharToCharArray(text,":");
-      }
-      text = appendCharToCharArray(text,"%x", a);
-    }
-  }
-
-  return text;
-}
-
-char* appendCharToCharArray(char* array, char a)
-{
-    size_t len = strlen(array);
-
-    char* ret = new char[len+2];
-
-    strcpy(ret, array);
-    ret[len] = a;
-    ret[len+1] = '\0';
-
-    return ret;
-}
 
 static void res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
 
@@ -126,12 +60,7 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 {
   const char *len = NULL;
   /* Some data that has the length up to REST_MAX_CHUNK_SIZE. For more, see the chunk resource. */
-  /*char const *const message = "Hello World! ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxy";*/
-
-  /*char const *const message = getHostAddress();*/
-  /*uip_ipaddr_t address = getHostAddress();*/
-  char *address = ipaddr_get_char(getHostAddress());
-
+  char const *const message = "Hello World! ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxy";
   int length = 12; /*           |<-------->| */
 
   /* The query string can be retrieved by rest_get_query() or parsed for its key-value pairs. */
@@ -143,13 +72,9 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
     if(length > REST_MAX_CHUNK_SIZE) {
       length = REST_MAX_CHUNK_SIZE;
     }
-    /*memcpy(buffer, message, length);*/
-    snprintf((char *)buffer, length, "%s", address);
-
+    memcpy(buffer, message, length);
   } else {
-    /*memcpy(buffer, message, length);*/
-    snprintf((char *)buffer, length, "%s", address);
-
+    memcpy(buffer, message, length);
   } REST.set_header_content_type(response, REST.type.TEXT_PLAIN); /* text/plain is the default, hence this option could be omitted. */
   REST.set_header_etag(response, (uint8_t *)&length, 1);
   REST.set_response_payload(response, buffer, length);
