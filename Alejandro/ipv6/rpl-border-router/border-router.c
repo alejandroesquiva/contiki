@@ -104,8 +104,13 @@ PROCESS_THREAD(webserver_nogui_process, ev, data)
 }
 AUTOSTART_PROCESSES(&border_router_process,&webserver_nogui_process);
 
-static const char *TOP = "<html><head><title>ContikiRPL</title></head><body>\n";
-static const char *BOTTOM = "</body></html>\n";
+static const char *TOP = "";
+static const char *BOTTOM = "";
+
+//static const char *TOP = "<html><head><title>ContikiRPL</title><meta http-equiv=\"Content-Type\" content=\"application/json; charset=utf-8\"></head><body>\n";
+//static const char *BOTTOM = "</body></html>\n";
+
+
 #if BUF_USES_STACK
 static char *bufptr, *bufend;
 #define ADD(...) do {                                                   \
@@ -161,7 +166,9 @@ PT_THREAD(generate_routes(struct httpd_state *s))
 #else
   blen = 0;
 #endif
-  ADD("Neighbors<pre>");
+  ADD("[{\"Neighbors\":[");
+
+  int chapuza = 0;
 
   for(nbr = nbr_table_head(ds6_neighbors);
       nbr != NULL;
@@ -194,7 +201,15 @@ PT_THREAD(generate_routes(struct httpd_state *s))
 }
 #endif
 #else
+      if(chapuza == 0){
+        ADD("{\"mote\":\"");
+        chapuza ++;
+      }else{
+        ADD(",{\"mote\":\"");
+      }
       ipaddr_add(&nbr->ipaddr);
+      ADD("\"}");
+
 #endif
 
       ADD("\n");
@@ -210,7 +225,10 @@ PT_THREAD(generate_routes(struct httpd_state *s))
       }
 #endif
   }
-  ADD("</pre>Routes<pre>");
+  ADD("]},{\"Routes\":[");
+
+  chapuza = 0;
+
   SEND_STRING(&s->sout, buf);
 #if BUF_USES_STACK
   bufptr = buf; bufend = bufptr + sizeof(buf);
@@ -240,16 +258,25 @@ PT_THREAD(generate_routes(struct httpd_state *s))
     ipaddr_add(&r->ipaddr);
     ADD("</a>");
 #else
+    if(chapuza == 0){
+      ADD("{\"mote\":\"");
+      chapuza ++;
+    }else{
+      ADD(",{\"mote\":\"");
+    }
     ipaddr_add(&r->ipaddr);
+    //ADD("\",");
 #endif
 #endif
-    ADD("/%u (via ", r->length);
+    //ADD("/%u (via ", r->length);
+    ADD("\",\"parent\":\"");
     ipaddr_add(uip_ds6_route_nexthop(r));
-    if(1 || (r->state.lifetime < 600)) {
+    ADD("\"}");
+    /*if(1 || (r->state.lifetime < 600)) {
       ADD(") %lus\n", (unsigned long)r->state.lifetime);
     } else {
       ADD(")\n");
-    }
+    }*/
     SEND_STRING(&s->sout, buf);
 #if BUF_USES_STACK
     bufptr = buf; bufend = bufptr + sizeof(buf);
@@ -257,7 +284,8 @@ PT_THREAD(generate_routes(struct httpd_state *s))
     blen = 0;
 #endif
   }
-  ADD("</pre>");
+  //ADD("</pre>");
+  ADD("]}]");
 
 #if WEBSERVER_CONF_FILESTATS
   static uint16_t numtimes;

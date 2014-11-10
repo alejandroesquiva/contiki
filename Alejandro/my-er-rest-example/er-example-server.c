@@ -89,11 +89,12 @@ extern resource_t res_battery;
 #include "dev/radio-sensor.h"
 extern resource_t res_radio;
 #endif
+*/
 #if PLATFORM_HAS_SHT11
 #include "dev/sht11/sht11-sensor.h"
 extern resource_t res_sht11;
 #endif
-*/
+
 
 PROCESS(er_example_server, "Erbium Example Server");
 AUTOSTART_PROCESSES(&er_example_server);
@@ -152,11 +153,12 @@ PROCESS_THREAD(er_example_server, ev, data)
   rest_activate_resource(&res_radio, "sensors/radio");
   SENSORS_ACTIVATE(radio_sensor);
 #endif
+*/
 #if PLATFORM_HAS_SHT11
   rest_activate_resource(&res_sht11, "sensors/sht11");
   SENSORS_ACTIVATE(sht11_sensor);
 #endif
-*/
+
 
   /* Define application-specific events here. */
   while(1) {
